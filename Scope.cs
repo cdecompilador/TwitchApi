@@ -12,6 +12,9 @@ public class Scopes
     public const byte ChannelManageVips = 1 << 2;
     public const byte UserReadFollows = 1 << 3;
     public const byte UserReadSubscriptions = 1 << 4;
+    public const byte ModeratorReadFollowers = 1 << 5;
+    public const byte ModeratorReadChatters = 1 << 6;
+    public const byte ModeratorManageBannedUsers = 1 << 7;
 
     public static string ToUrlEncodedString(byte scopes)
     {
@@ -26,6 +29,12 @@ public class Scopes
             sb.Append("user:read:follows ");
         if ((scopes & Scopes.UserReadSubscriptions) != 0)
             sb.Append("user:read:subscriptions ");
+        if ((scopes & Scopes.ModeratorReadFollowers) != 0)
+            sb.Append("moderator:read:followers ");
+        if ((scopes & Scopes.ModeratorReadChatters) != 0)
+            sb.Append("moderator:read:chatters");
+        if ((scopes & Scopes.ModeratorManageBannedUsers) != 0)
+            sb.Append("moderator:manage:banned_users");
 
         if (sb.Length != 0)
             sb.Remove(sb.Length - 1, 1);
@@ -45,5 +54,11 @@ public class Scopes
             scopes &= Scopes.UserReadFollows;
         if (scopeStr == "user:read:subscriptions")
             scopes &= Scopes.UserReadSubscriptions;
+        if (scopeStr == "moderator:read:followers")
+            scopes &= Scopes.ModeratorReadFollowers; 
+        if (scopeStr == "moderator:read:chatters")
+            scopes &= Scopes.ModeratorReadChatters;
+        if (scopeStr == "moderator:manage:banned_users")
+            scopes &= Scopes.ModeratorManageBannedUsers;
     }
 }

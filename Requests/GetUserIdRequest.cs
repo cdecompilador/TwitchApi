@@ -1,8 +1,6 @@
-using System.Text.Json;
-
 namespace TwitchApi;
 
-public struct GetUserId : IRequest<string>
+public struct GetUserIdRequest : IRequest<string>
 {
     public byte Scope => Scopes.NoScope;
     public byte StateRequirements => 
@@ -10,7 +8,7 @@ public struct GetUserId : IRequest<string>
 
     private string _targetName;
 
-    public GetUserId(string targetName)
+    public GetUserIdRequest(string targetName)
     {
         _targetName = targetName;
     }

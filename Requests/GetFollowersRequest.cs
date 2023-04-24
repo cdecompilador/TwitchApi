@@ -1,15 +1,13 @@
-using System.Text.Json;
-
 namespace TwitchApi;
 
-public struct GetFollowedRequest : IRequest<List<TwitchUser>>
+public struct GetFollowersRequest : IRequest<List<TwitchUser>>
 {
-    public byte Scope => Scopes.UserReadFollows;
+    public byte Scope => Scopes.ModeratorReadFollowers;
     public byte StateRequirements => ConnState.UserAuthorized;
 
     private string _targetId;
 
-    public GetFollowedRequest(string targetId)
+    public GetFollowersRequest(string targetId)
     {
         _targetId = targetId;
     }
@@ -20,15 +18,17 @@ public struct GetFollowedRequest : IRequest<List<TwitchUser>>
             HttpClient client)
     {
         var users = new List<TwitchUser>();
-        
+
         // La primera request va sin paginación
         var json = await Api.TwitchRequest(secrets, accessToken)
-            .AtEndpoint("channels/followed")
-            .WithQueryParam("user_id", _targetId)
+            .AtEndpoint("channels/followers")
+            .WithQueryParam("broadcaster_id", _targetId)
             .GetAsync(client);
 
         // Deserializar y Añadir los usuarios
         users.AddRange(TwitchUser.DeserializeMany(json));
+
+        Console.WriteLine(json.RootElement.ToString());
 
         // Ahora con la paginación enviar queries hasta que se acaben las
         // páginas
@@ -37,8 +37,8 @@ public struct GetFollowedRequest : IRequest<List<TwitchUser>>
         {
             // Deserializar y Añadir los usuarios
             json = await Api.TwitchRequest(secrets, accessToken)
-                .AtEndpoint("channels/followed")
-                .WithQueryParam("user_id", _targetId)
+                .AtEndpoint("channels/followers")
+                .WithQueryParam("broadcast_id", _targetId)
                 .WithQueryParam("after", page)
                 .GetAsync(client);
             users.AddRange(TwitchUser.DeserializeMany(json));

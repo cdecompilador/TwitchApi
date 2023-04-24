@@ -7,7 +7,7 @@ public static class ConnState
     public const byte UserAuthorized = 1 << 2;
 }
 
-public class TwitchConnection : IDisposable
+public class TwitchConnection : IAsyncDisposable
 {
     private int _state;
     private HttpClient _client;
@@ -25,8 +25,10 @@ public class TwitchConnection : IDisposable
         _accessToken = accessToken;
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
+        await _accessToken.Revoke(_client, _secrets);
+        _client.Dispose();
     }
 
     private async Task<TRes> SendRequest<TReq, TRes>(TReq req)
@@ -54,7 +56,23 @@ public class TwitchConnection : IDisposable
     public async Task<string> GetUserId(string targetChannel)
     {
         return await SendRequest<
-            GetUserId, string
+            GetUserIdRequest, string
         >(new(targetChannel));
+    }
+
+    public async Task<List<TwitchUser>> GetFollowersOf(string targetChannel)
+    {
+        var targetChannelId = await GetUserId(targetChannel);
+        return await SendRequest<
+            GetFollowersRequest, List<TwitchUser>
+        >(new(targetChannelId));
+    }
+
+    public async Task<int> GetFollowersCountOf(string targetChannel)
+    {
+        var targetChannelId = await GetUserId(targetChannel);
+        return await SendRequest<
+            GetFollowersCountRequest, int
+        >(new(targetChannelId));
     }
 }
